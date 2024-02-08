@@ -1,0 +1,116 @@
+local dirtylarry = require("dirtylarry/dirtylarry")
+
+function init(self)
+	self.btn_json = gui.get_node("json/larrybutton")
+	self.btn_lua = gui.get_node("lua/larrybutton")
+	self.btn_lua_data = gui.get_node("lua_data/larrybutton")
+	self.btn_unload = gui.get_node("unload/larrybutton")
+
+	self.lua_mem = gui.get_node("lua_mem")
+
+	gui.set_enabled(self.btn_unload, false)
+	msg.post(".", "acquire_input_focus")
+	self.time = {}
+	self.time_nodes = {}
+	self.av_time_nodes = {}
+	collectgarbage("stop")
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+local function summ_time(tbl)
+	local sum = 0
+	for k, v in pairs(tbl) do
+		sum = sum + v
+	end
+	return sum
+end
+
+function update(self, dt)
+	for name, time_tbl in pairs(self.time) do
+		local last_time = time_tbl[#time_tbl]
+		local av_time = summ_time(time_tbl) / #time_tbl
+		gui.set_text(self.time_nodes[name], string.format("latest: %.4f s", last_time))
+		gui.set_text(self.av_time_nodes[name], string.format("av. time: %.4f s", av_time))
+	end
+
+	gui.set_text(self.lua_mem, string.format("%.2f Mb", collectgarbage("count")/1024))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("proxy_loaded") then
+		msg.post(sender, "init")
+		msg.post(sender, "enable")
+	elseif message_id == hash("proxy_unloaded") then
+		gui.set_enabled(self.btn_unload, false)
+		gui.set_enabled(self.btn_json, true)
+		gui.set_enabled(self.btn_lua, true)
+		gui.set_enabled(self.btn_lua_data, true)
+	elseif message_id == hash("time_m") then
+		local time = message.time - self.start_load_time
+		if not self.time[self.current] then
+			self.time[self.current] = {}
+			self.time_nodes[self.current] = gui.get_node("last_time_"..self.current)
+			self.av_time_nodes[self.current] = gui.get_node("av_time_"..self.current)
+		end
+		local data = self.time[self.current]
+		data[#data + 1] = time
+		gui.set_enabled(self.btn_unload, true)
+	end
+end
+
+local function load(self, proxy)
+	gui.set_enabled(self.btn_json, false)
+	gui.set_enabled(self.btn_lua, false)
+	gui.set_enabled(self.btn_lua_data, false)
+	self.start_load_time = socket.gettime()
+	self.current_proxy = "#"..proxy.."_proxy"
+	self.current = proxy
+	msg.post(self.current_proxy, "load")
+end
+
+local function unload(self)
+	msg.post(self.current_proxy, "disable")
+	msg.post(self.current_proxy, "final")
+	msg.post(self.current_proxy, "unload")
+end
+
+function on_input(self, action_id, action)
+	if gui.is_enabled(self.btn_json) then
+		dirtylarry:button("json", action_id, action, function ()
+			load(self, "json")
+		end)
+	end
+
+	if gui.is_enabled(self.btn_lua) then
+		dirtylarry:button("lua", action_id, action, function ()
+			load(self, "lua")
+		end)
+	end
+
+	if gui.is_enabled(self.btn_lua_data) then
+		dirtylarry:button("lua_data", action_id, action, function ()
+			load(self, "lua_data")
+		end)
+	end
+	
+	if gui.is_enabled(self.btn_unload) then
+		dirtylarry:button("unload", action_id, action, function ()
+			unload(self)
+		end)
+	end
+
+	dirtylarry:button("gc", action_id, action, function ()
+		collectgarbage("collect")
+	end)
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end
