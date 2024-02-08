@@ -1,4 +1,4 @@
-local palette = require("main.lua.lua")
+local data = require("main.lua.lua")
 
 function init(self)
 	print("Lua Loaded")

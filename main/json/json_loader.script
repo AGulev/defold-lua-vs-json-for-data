@@ -1,5 +1,5 @@
 function init(self)
-	self.palette = json.decode(sys.load_resource("/main/json/json.json"))
+	self.data = json.decode(sys.load_resource("/main/json/json.json"))
 	print("json Loaded")
 	
 	local time_m = socket.gettime()
