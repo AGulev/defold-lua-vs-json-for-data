@@ -14,8 +14,7 @@ function init(self)
 	self.time = {}
 	self.time_nodes = {}
 	self.av_time_nodes = {}
-	collectgarbage("stop")
-	self.is_gc = false
+	self.is_gc = true
 end
 
 function final(self)
