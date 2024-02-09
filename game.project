@@ -5,7 +5,7 @@ main_collection = /main/main.collectionc
 shared_state = 1
 
 [display]
-width = 960
+width = 1100
 height = 640
 
 [android]
@@ -13,7 +13,7 @@ input_method = HiddenInputField
 
 [project]
 title = big_lua_file_test
-custom_resources = /main/json/json.json,/main/lua_data/lua_data.lua
+custom_resources = /main/json/json.json,/main/lua_data/lua_data.lua,/main/sys/sys_data
 dependencies#0 = https://github.com/andsve/dirtylarry/archive/refs/heads/master.zip
 
 [html5]

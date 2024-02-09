@@ -1,6 +1,6 @@
 function init(self)
 	print("Lua Data Loaded")
-	self.data = loadstring(sys.load_resource("/main/lua_data/lua_data.lua"))
+	self.data = loadstring(sys.load_resource("/main/lua_data/lua_data.lua"))()
 	local time_m = socket.gettime()
 	msg.post("main:/go#gui", "time_m", {time = time_m})
 end
